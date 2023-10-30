@@ -34,6 +34,10 @@ public class BlogController {
     public BlogController(){
         BlobServiceClientBuilder builder = new BlobServiceClientBuilder();
         client = builder.connectionString("UseDevelopmentStorage=true").buildClient();
+        //ВАЖНО!!!!
+        //azurite --silent --location c:\azurite --debug c:\azurite\debug.log --skipApiVersionCheck
+        //Запускать Azurite ИМЕННО с этой команды, иначе выдаст ошибку
+        //ВАЖНО!!!!
         BlobSignedIdentifier identifier = new BlobSignedIdentifier().setId("test policy")
                 .setAccessPolicy(new BlobAccessPolicy().setStartsOn(OffsetDateTime.now())
                         .setExpiresOn(OffsetDateTime.now().plusDays(7))
