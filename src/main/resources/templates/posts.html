@@ -16,6 +16,7 @@
     <div class="row" th:each="item : ${list}">
             <div>
                 <h4 th:text="${item.header}"></h4>
+                <img class="w-25" th:src="${item.image}">
                 <a th:href="'/posts/'+${item.id}">Details</a>
             </div>
 
