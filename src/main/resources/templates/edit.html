@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="eu" xmlns:th="http://www.thymeleaf.org">
+<head th:insert="sections/head ::head">
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+
+</head>
+
+<body>
+<header th:insert="sections/header ::header">
+
+</header>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <form action="/posts/edit" enctype="multipart/form-data" method="post">
+                <input type="hidden" name="id" th:value="${item.getId()}">
+                <div><label class="form-label">Header:<input th:value="${item.getHeader()}" class="form-control" name="header" type="text"></label></div>
+                <div><label class="form-label">Context<textarea th:text="${item.getContext()}" name="context" class="form-control"></textarea></label></div>
+                <div><label  class="form-label">Image:<input class="form-control"  name="image" type="file"></label></div>
+                <div class="btn-group">
+                    <button class="btn btn-outline-success">Save</button>
+                    <a href="/posts" class="btn btn-outline-secondary">Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<footer th:insert="sections/footer ::footer"></footer>
+</body>
+
+</html>

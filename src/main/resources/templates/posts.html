@@ -13,11 +13,30 @@
 <div class="container">
         <h2>Posts:</h2>
         <hr>
+            <h3>Filters:</h3>
+        <div class="d-flex">
+            <form>
+
+                <label class="form-label">Header: <input th:value="${header}" name="header" type="text" class="form-control"></label>
+                <label  class="form-label">Context: <input th:value="${desc}" name="desc" type="text" class="form-control"></label>
+                <button class="btn btn-outline-primary">Filter</button>
+            </form>
+        </div>
+        <hr>
     <div class="row" th:each="item : ${list}">
             <div>
-                <h4 th:text="${item.header}"></h4>
-                <img class="w-25" th:src="${item.image}">
-                <a th:href="'/posts/'+${item.id}">Details</a>
+                <div><h4 th:text="${item.header}"></h4></div>
+                <div><img class="w-25" th:src="${item.image}"></div>
+                <form action="/posts/delete" method="post" th:id="'delete'+${item.getId()}">
+                    <input type="hidden" th:value="${item.getId()}" name="id" >
+                </form>
+                <div class="btn-group">
+                    <a class="btn btn-outline-warning" th:href="'/posts/edit/'+${item.getId()}">Edit</a>
+                    <a class="btn btn-outline-primary" th:href="'/posts/'+${item.getId()}">Details</a>
+                    <button th:form="'delete'+${item.getId()}" class="btn btn-outline-danger" th:href="'/posts/delete'+${item.getId()}">Delete</button>
+
+                </div>
+                <hr>
             </div>
 
     </div>

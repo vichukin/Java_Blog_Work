@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +25,8 @@ import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class BlogController {
@@ -49,8 +52,23 @@ public class BlogController {
         container.setAccessPolicy(PublicAccessType.CONTAINER,identifiers);
     }
     @GetMapping("/posts")
-    public String Post(Model model){
-        Iterable<Post> posts = postRepository.findAll();
+    public String Post(@RequestParam(required = false) String header,@RequestParam(required = false) String desc, Model model){
+
+        Iterable<Post> buf = postRepository.findAll();
+        List<Post> posts = new ArrayList<>();
+        for(var item: buf)
+            posts.add(item);
+        if(header!=null&&!header.equals(""))
+        {
+            model.addAttribute("header",header);
+            posts = posts.stream().filter(t->t.getHeader().contains(header)).collect(Collectors.toList());
+        }
+        if(desc!=null&&!desc.equals(""))
+        {
+            model.addAttribute("desc",desc);
+            posts = posts.stream().filter(t->t.getContext().contains(desc)).collect(Collectors.toList());
+        }
+
         model.addAttribute("list",posts);
         return "posts";
     }
@@ -80,6 +98,56 @@ public class BlogController {
 
 
         postRepository.save(post);
+        return "redirect:/posts";
+    }
+
+    @GetMapping("/posts/edit/{id}")
+    public String edit(@PathVariable(value = "id")long id,Model model){
+        Post post = postRepository.findById(id).orElse(null);
+        if(post!=null)
+        {
+            model.addAttribute("item",post);
+            return "edit";
+
+        }
+        else
+            return "redirect:/posts";
+    }
+    @PostMapping("/posts/edit")
+    public String edit( @RequestParam long id,@RequestParam String header, @RequestParam String context, @RequestParam MultipartFile image,Model model)
+    {
+        Post post = postRepository.findById(id).orElse(null);
+        if(!context.equals(post.getContext()))
+            post.setContext(context);
+        if(!header.equals(post.getHeader()))
+            post.setHeader(header);
+        if(image!=null)
+        {
+            BlobClient cl = container.getBlobClient(post.getImage());
+            cl.deleteIfExists();
+            cl = container.getBlobClient(image.getOriginalFilename());
+            try {
+                cl.upload(image.getInputStream());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            post.setImage(cl.getBlobUrl());
+
+        }
+        postRepository.save(post);
+        return "redirect:/posts";
+    }
+    @PostMapping("/posts/delete")
+    public String delete(@RequestParam long id)
+    {
+        Post post = postRepository.findById(id).orElse(null);
+        if(post!=null)
+        {
+            BlobClient cl = container.getBlobClient(post.getImage());
+            cl.deleteIfExists();
+            postRepository.delete(post);
+
+        }
         return "redirect:/posts";
     }
 
